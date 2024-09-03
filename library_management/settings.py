@@ -33,6 +33,10 @@ environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 # Security settings
 SECRET_KEY = env("SECRET_KEY")
 DEBUG = env("DEBUG")
+
+CORS_ALLOW_ALL_ORIGINS = env.bool("CORS_ALLOW_ALL_ORIGINS")
+CORS_ORIGIN_ALLOW_ALL = env.bool("CORS_ORIGIN_ALLOW_ALL")
+
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
 
@@ -45,10 +49,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
