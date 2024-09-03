@@ -27,7 +27,12 @@ class Book(models.Model):
     title = models.CharField(max_length=255, help_text="Enter book's title")
     description = models.TextField(help_text="Enter book's description")
     publish_date = models.DateField(help_text="Enter book's publish date")
-    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    author = models.ForeignKey(
+        Author,
+        on_delete=models.CASCADE,
+        related_name="books",
+        help_text="Enter book's author",
+    )
 
     def __str__(self):
         return self.title
