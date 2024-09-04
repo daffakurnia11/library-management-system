@@ -21,7 +21,7 @@ class AuthorViewSet(viewsets.ModelViewSet):
         """
         try:
             author = Author.objects.get(pk=pk)
-            books = author.books.all()
+            books = author.books.select_related("author").all()
             serializer = BookSerializer(books, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Author.DoesNotExist:
@@ -35,4 +35,5 @@ class BookViewSet(viewsets.ModelViewSet):
     ViewSet for the Book model.
     """
 
+    queryset = Book.objects.select_related("author").all()
     serializer_class = BookSerializer
