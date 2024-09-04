@@ -66,6 +66,13 @@ class AuthorAPITestCase(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+    def test_create_author_with_future_birth_date(self):
+        url = reverse("api:authors-list")
+        future_date_data = self.author_data.copy()
+        future_date_data["birth_date"] = "2050-01-01"
+        response = self.client.post(url, future_date_data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def test_create_author_without_required_fields(self):
         url = reverse("api:authors-list")
         invalid_data = {
@@ -142,7 +149,6 @@ class BookAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_create_book_with_future_publish_date(self):
-        # Test creating a book with a publish date in the future
         url = reverse("api:books-list")
         future_date_data = self.book_data.copy()
         future_date_data["publish_date"] = "2050-01-01"
@@ -150,7 +156,6 @@ class BookAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_update_book_with_invalid_data(self):
-        # Test updating a book with an empty title
         url = reverse("api:books-detail", args=[self.book.id])
         invalid_data = self.book_data.copy()
         invalid_data["title"] = ""
@@ -158,13 +163,11 @@ class BookAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_retrieve_book_with_invalid_uuid_format(self):
-        # Test retrieving a book with an invalid UUID format
         url = reverse("api:books-detail", args=["invalid-uuid-format"])
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_nonexistent_book(self):
-        # Test deleting a book that does not exist
         url = reverse("api:books-detail", args=["nonexistent-id"])
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
