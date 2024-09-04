@@ -1,5 +1,4 @@
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
+from django.core.cache import cache
 from django.conf import settings
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -17,15 +16,30 @@ class AuthorViewSet(viewsets.ModelViewSet):
     queryset = Author.objects.all()
     serializer_class = AuthorSerializer
 
-    @method_decorator(cache_page(settings.CACHE_TIMEOUT))  # Cache for 15 minutes
     def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+        """
+        List all authors, using cache if available.
+        """
+        cache_key = "all_authors"
+        authors = cache.get(cache_key)
+        if not authors:
+            authors = super().list(request, *args, **kwargs).data
+            cache.set(cache_key, authors, settings.CACHE_TIMEOUT)
+        return Response(authors)
 
-    @method_decorator(cache_page(settings.CACHE_TIMEOUT))  # Cache for 15 minutes
     def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
+        """
+        Retrieve a specific author, using cache if available.
+        """
+        cache_key = f"author_{kwargs['pk']}"
+        author = cache.get(cache_key)
+        if not author:
+            response = super().retrieve(request, *args, **kwargs)
+            if response.status_code == 200:
+                cache.set(cache_key, response.data, settings.CACHE_TIMEOUT)
+            return response
+        return Response(author)
 
-    @method_decorator(cache_page(settings.CACHE_TIMEOUT))  # Cache for 15 minutes
     @action(detail=True, methods=["get"], url_path="books")
     def get_books(self, request, pk=None):
         """
@@ -40,6 +54,20 @@ class AuthorViewSet(viewsets.ModelViewSet):
         serializer = BookSerializer(books, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        cache.delete("all_authors")
+
+    def perform_update(self, serializer):
+        super().perform_update(serializer)
+        cache.delete("all_authors")
+        cache.delete(f"author_{serializer.instance.pk}")
+
+    def perform_destroy(self, instance):
+        cache.delete("all_authors")
+        cache.delete(f"author_{instance.pk}")
+        super().perform_destroy(instance)
+
 
 class BookViewSet(viewsets.ModelViewSet):
     """
@@ -49,10 +77,40 @@ class BookViewSet(viewsets.ModelViewSet):
     queryset = Book.objects.select_related("author").all()
     serializer_class = BookSerializer
 
-    @method_decorator(cache_page(settings.CACHE_TIMEOUT))  # Cache for 15 minutes
     def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+        """
+        List all books, using cache if available.
+        """
+        cache_key = "all_books"
+        books = cache.get(cache_key)
+        if not books:
+            books = super().list(request, *args, **kwargs).data
+            cache.set(cache_key, books, settings.CACHE_TIMEOUT)
+        return Response(books)
 
-    @method_decorator(cache_page(settings.CACHE_TIMEOUT))  # Cache for 15 minutes
     def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
+        """
+        Retrieve a specific book, using cache if available.
+        """
+        cache_key = f"book_{kwargs['pk']}"
+        book = cache.get(cache_key)
+        if not book:
+            response = super().retrieve(request, *args, **kwargs)
+            if response.status_code == 200:
+                cache.set(cache_key, response.data, settings.CACHE_TIMEOUT)
+            return response
+        return Response(book)
+
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        cache.delete("all_books")
+
+    def perform_update(self, serializer):
+        super().perform_update(serializer)
+        cache.delete("all_books")
+        cache.delete(f"book_{serializer.instance.pk}")
+
+    def perform_destroy(self, instance):
+        cache.delete("all_books")
+        cache.delete(f"book_{instance.pk}")
+        super().perform_destroy(instance)
