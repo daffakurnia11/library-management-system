@@ -12,6 +12,14 @@ class AuthorSerializer(serializers.ModelSerializer):
         model = Author
         fields = "__all__"
 
+    def validate_birth_date(self, value):
+        """
+        Check that the birth date is not in the future.
+        """
+        if value > date.today():
+            raise serializers.ValidationError("Birth date cannot be in the future.")
+        return value
+
 
 class BookSerializer(serializers.ModelSerializer):
     """
