@@ -3,6 +3,10 @@ from uuid import uuid4
 
 
 class Author(models.Model):
+    """
+    Model representing an author of a book in the library.
+    """
+
     id = models.UUIDField(
         primary_key=True,
         default=uuid4,
@@ -18,6 +22,10 @@ class Author(models.Model):
 
 
 class Book(models.Model):
+    """
+    Model representing a book in the library.
+    """
+
     id = models.UUIDField(
         primary_key=True,
         default=uuid4,
@@ -32,6 +40,7 @@ class Book(models.Model):
         on_delete=models.CASCADE,
         related_name="books",
         help_text="Enter book's author",
+        db_index=True,
     )
 
     def __str__(self):
