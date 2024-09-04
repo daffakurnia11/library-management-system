@@ -19,15 +19,14 @@ class AuthorViewSet(viewsets.ModelViewSet):
         """
         Retrieve all books by a specific author.
         """
-        try:
-            author = Author.objects.get(pk=pk)
-            books = author.books.select_related("author").all()
-            serializer = BookSerializer(books, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Author.DoesNotExist:
+        author = Author.objects.prefetch_related("books").filter(id=pk).first()
+        if not author:
             return Response(
                 {"error": "Author not found"}, status=status.HTTP_404_NOT_FOUND
             )
+        books = author.books.all()
+        serializer = BookSerializer(books, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class BookViewSet(viewsets.ModelViewSet):
