@@ -5,6 +5,10 @@ from .views import BookViewSet, AuthorViewSet
 app_name = "api"
 
 router = DefaultRouter()
+
+"""
+Router for the viewset.
+"""
 router.register(r"authors", viewset=AuthorViewSet, basename="authors")
 router.register(r"books", viewset=BookViewSet, basename="books")
 

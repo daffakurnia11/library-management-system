@@ -55,15 +55,24 @@ class AuthorViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def perform_create(self, serializer):
+        """
+        Cache all authors after a create operation.
+        """
         super().perform_create(serializer)
         cache.delete("all_authors")
 
     def perform_update(self, serializer):
+        """
+        Cache all authors after an update operation.
+        """
         super().perform_update(serializer)
         cache.delete("all_authors")
         cache.delete(f"author_{serializer.instance.pk}")
 
     def perform_destroy(self, instance):
+        """
+        Cache all authors after a destroy operation.
+        """
         cache.delete("all_authors")
         cache.delete(f"author_{instance.pk}")
         super().perform_destroy(instance)
@@ -102,15 +111,24 @@ class BookViewSet(viewsets.ModelViewSet):
         return Response(book)
 
     def perform_create(self, serializer):
+        """
+        Cache all books after a create operation.
+        """
         super().perform_create(serializer)
         cache.delete("all_books")
 
     def perform_update(self, serializer):
+        """
+        Cache all books after an update operation.
+        """
         super().perform_update(serializer)
         cache.delete("all_books")
         cache.delete(f"book_{serializer.instance.pk}")
 
     def perform_destroy(self, instance):
+        """
+        Cache all books after a destroy operation.
+        """
         cache.delete("all_books")
         cache.delete(f"book_{instance.pk}")
         super().perform_destroy(instance)

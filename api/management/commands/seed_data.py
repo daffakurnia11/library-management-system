@@ -13,7 +13,9 @@ class Command(BaseCommand):
         self.stdout.write("Seeding complete.")
 
     def seed_authors(self):
-        """Create sample authors."""
+        """
+        Create sample authors.
+        """
         faker = Faker()
         for _ in range(10):
             Author.objects.create(
@@ -24,7 +26,9 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("Authors seeded successfully."))
 
     def seed_books(self):
-        """Create sample books linked to authors."""
+        """
+        Create sample books linked to authors.
+        """
         faker = Faker()
         authors = Author.objects.all()
         if not authors:
