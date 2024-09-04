@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Book, Author
+from datetime import date
 
 
 class AuthorSerializer(serializers.ModelSerializer):
@@ -25,3 +26,11 @@ class BookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
         fields = ["id", "title", "description", "publish_date", "author", "author_id"]
+
+    def validate_publish_date(self, value):
+        """
+        Check that the publish date is not in the future.
+        """
+        if value > date.today():
+            raise serializers.ValidationError("Publish date cannot be in the future.")
+        return value
